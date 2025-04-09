@@ -1,0 +1,52 @@
+package org.springframework.samples.petclinic.visits.model;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@ActiveProfiles("test")
+class VisitRepositoryTests {
+
+    @Autowired
+    private VisitRepository visitRepository;
+
+    @Test
+    void shouldFindVisitsByPetId() {
+        Collection<Visit> visits = visitRepository.findByPetId(7);
+        assertThat(visits).hasSize(2);
+        
+        Visit[] visitArr = visits.toArray(new Visit[visits.size()]);
+        assertThat(visitArr[0].getPetId()).isEqualTo(7);
+    }
+
+    @Test
+    void shouldFindVisitsByPetIds() {
+        List<Visit> visits = visitRepository.findByPetIdIn(List.of(7, 8));
+        assertThat(visits).isNotEmpty();
+        assertThat(visits).allMatch(v -> List.of(7, 8).contains(v.getPetId()));
+    }
+
+    @Test
+    void shouldInsertVisit() {
+        int visitCountBefore = visitRepository.findByPetId(7).size();
+        
+        Visit visit = new Visit();
+        visit.setPetId(7);
+        visit.setDate(new Date());
+        visit.setDescription("Test Visit");
+        
+        visit = visitRepository.save(visit);
+        assertThat(visit.getId()).isNotNull();
+        
+        Collection<Visit> visits = visitRepository.findByPetId(7);
+        assertThat(visits.size()).isEqualTo(visitCountBefore + 1);
+    }
+}
