@@ -1,49 +1,41 @@
 def detectChanges() {
-    def services = [
+    def branch_name = ""
+
+    // Xác định branch để so sánh
+    if (env.CHANGE_ID) {
+        branch_name = "${env.CHANGE_TARGET}"
+        // Fetch branch chính nếu là Pull Request
+        sh "git fetch origin ${branch_name}:${branch_name} --no-tags"
+    } else {
+        branch_name = "HEAD~1"
+    }
+
+    // Lấy danh sách các file thay đổi
+    def changedFiles = sh(script: "git diff --name-only ${branch_name}", returnStdout: true).trim()
+    echo "Changed files:\n${changedFiles}"
+
+    // Danh sách các thư mục service
+    def folderList = [
+        'spring-petclinic-customers-service',
+        'spring-petclinic-vets-service',
+        'spring-petclinic-visits-service',
         'spring-petclinic-admin-server',
         'spring-petclinic-api-gateway',
         'spring-petclinic-config-server',
-        'spring-petclinic-customers-service',
         'spring-petclinic-discovery-server',
-        'spring-petclinic-genai-service',
-        'spring-petclinic-vets-service',
-        'spring-petclinic-visits-service'
+        'spring-petclinic-genai-service'
     ]
-    
-    def changedServices = []
-    
-    // Fetch đầy đủ các branch từ remote
-    sh "git fetch --all"
 
-    // For pull requests
-    if (env.CHANGE_ID) {
-        echo "Processing Pull Request #${env.CHANGE_ID}"
-        for (service in services) {
-            def changes = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} HEAD | grep ^${service}/", returnStatus: true)
-            if (changes == 0) {
-                echo "Detected changes in ${service}"
-                changedServices.add(service)
-            }
-        }
-    } 
-    // For branches
-    else {
-        echo "Processing branch ${env.BRANCH_NAME}"
-        for (service in services) {
-            def changes = sh(script: "git diff --name-only origin/main HEAD | grep ^${service}/", returnStatus: true)
-            if (changes == 0) {
-                echo "Detected changes in ${service}"
-                changedServices.add(service)
-            }
-        }
-    }
-    
-    if (changedServices.size() == 0) {
-        echo "No service-specific changes detected, will build common components"
-        return ['spring-petclinic-config-server', 'spring-petclinic-discovery-server']
-    }
-    
-    return changedServices
+    // Lọc các thư mục service có thay đổi
+    def changedFolders = changedFiles.split('\n')
+        .collect { it.split('/')[0] } // Lấy thư mục gốc
+        .unique() // Loại bỏ trùng lặp
+        .findAll { folderList.contains(it) } // Chỉ giữ lại các thư mục trong danh sách folderList
+
+    echo "Changed Folders:\n${changedFolders.join('\n')}"
+
+    // Trả về danh sách các service có thay đổi
+    return changedFolders
 }
 
 pipeline {
