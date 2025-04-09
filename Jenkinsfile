@@ -208,24 +208,25 @@ pipeline {
                                 echo \$(echo "scale=2; 100 * \$COVERED / \$TOTAL" | bc)
                             """, returnStdout: true).trim()
                             
-                            // Cập nhật GitHub Checks
-                            githubChecks(
-                                name: 'Test Code Coverage',
-                                status: 'COMPLETED',
-                                conclusion: jacocoResult == 0 ? 'SUCCESS' : 'FAILURE',
-                                detailsURL: env.BUILD_URL,
-                                output: [
-                                    title: jacocoResult == 0 ? 'Code Coverage Check Passed' : 'Code Coverage Check Failed',
-                                    summary: jacocoResult == 0 
-                                        ? "Coverage is sufficient: ${codeCoverage}%." 
-                                        : "Coverage must be at least 70%. Your coverage is ${codeCoverage}%.",
-                                    text: jacocoResult == 0 
-                                        ? 'Code coverage meets the required threshold.' 
-                                        : 'Increase test coverage and retry the build.'
-                                ]
-                            )
-                            
-                            if (jacocoResult != 0) {
+                            // Cập nhật GitHub Checks bằng publishChecks
+                            if (jacocoResult == 0) {
+                                publishChecks(
+                                    name: 'Test Code Coverage',
+                                    title: 'Code Coverage Check Success!',
+                                    summary: 'All test code coverage is greater than 70%',
+                                    text: 'Check Success!',
+                                    detailsURL: env.BUILD_URL,
+                                    conclusion: 'SUCCESS'
+                                )
+                            } else {
+                                publishChecks(
+                                    name: 'Test Code Coverage',
+                                    title: 'Code Coverage Check Failed!',
+                                    summary: "Coverage must be at least 70%. Your coverage is ${codeCoverage}%.",
+                                    text: 'Increase test coverage and retry the build.',
+                                    detailsURL: env.BUILD_URL,
+                                    conclusion: 'FAILURE'
+                                )
                                 error "Code coverage check failed for ${service}. Coverage must be at least 70%."
                             }
                         }
