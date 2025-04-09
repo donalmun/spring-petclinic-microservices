@@ -165,10 +165,10 @@ pipeline {
                         dir(service) {
                             echo "Checking code coverage for ${service}..."
                             
-                            // Kiểm tra độ phủ code và fail nếu dưới 70%
-                            // Chạy riêng các goal của JaCoCo
+                            // Chạy JaCoCo để tạo báo cáo coverage
                             sh "mvn jacoco:report"
                             
+                            // Kiểm tra độ phủ code
                             def jacocoResult = sh(script: """
                                 # Extract coverage percentage from JaCoCo report
                                 COVERAGE_FILE=\$(find target/site/jacoco -name "jacoco.xml" | head -n 1)
@@ -198,6 +198,32 @@ pipeline {
                                     echo "Code coverage is sufficient (>=70%)"
                                 fi
                             """, returnStatus: true)
+                            
+                            // Lấy giá trị coverage để cập nhật GitHub Checks
+                            def codeCoverage = sh(script: """
+                                COVERAGE_FILE=\$(find target/site/jacoco -name "jacoco.xml" | head -n 1)
+                                COVERED=\$(grep -oP 'covered="\\d+"' \$COVERAGE_FILE | head -n 1 | grep -oP '\\d+')
+                                MISSED=\$(grep -oP 'missed="\\d+"' \$COVERAGE_FILE | head -n 1 | grep -oP '\\d+')
+                                TOTAL=\$((\$COVERED + \$MISSED))
+                                echo \$(echo "scale=2; 100 * \$COVERED / \$TOTAL" | bc)
+                            """, returnStdout: true).trim()
+                            
+                            // Cập nhật GitHub Checks
+                            githubChecks(
+                                name: 'Test Code Coverage',
+                                status: 'COMPLETED',
+                                conclusion: jacocoResult == 0 ? 'SUCCESS' : 'FAILURE',
+                                detailsURL: env.BUILD_URL,
+                                output: [
+                                    title: jacocoResult == 0 ? 'Code Coverage Check Passed' : 'Code Coverage Check Failed',
+                                    summary: jacocoResult == 0 
+                                        ? "Coverage is sufficient: ${codeCoverage}%." 
+                                        : "Coverage must be at least 70%. Your coverage is ${codeCoverage}%.",
+                                    text: jacocoResult == 0 
+                                        ? 'Code coverage meets the required threshold.' 
+                                        : 'Increase test coverage and retry the build.'
+                                ]
+                            )
                             
                             if (jacocoResult != 0) {
                                 error "Code coverage check failed for ${service}. Coverage must be at least 70%."
