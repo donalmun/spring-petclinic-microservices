@@ -12,6 +12,9 @@ def detectChanges() {
     
     def changedServices = []
     
+    // Fetch đầy đủ các branch từ remote
+    sh "git fetch --all"
+
     // For pull requests
     if (env.CHANGE_ID) {
         echo "Processing Pull Request #${env.CHANGE_ID}"
@@ -27,7 +30,7 @@ def detectChanges() {
     else {
         echo "Processing branch ${env.BRANCH_NAME}"
         for (service in services) {
-            def changes = sh(script: "git diff --name-only HEAD~1 HEAD | grep ^${service}/", returnStatus: true)
+            def changes = sh(script: "git diff --name-only origin/main HEAD | grep ^${service}/", returnStatus: true)
             if (changes == 0) {
                 echo "Detected changes in ${service}"
                 changedServices.add(service)
