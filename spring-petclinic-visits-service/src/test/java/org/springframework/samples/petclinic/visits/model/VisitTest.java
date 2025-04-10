@@ -104,4 +104,20 @@ class VisitTest {
         visit.setId(null);
         assertThat(visit.getId()).isNull();
     }
+
+    @Test
+    void testBuilderPatternWithAllFields() {
+        Date date = new Date();
+        Visit visit = Visit.VisitBuilder.aVisit()
+            .id(1)
+            .petId(2)
+            .description("Complete Visit")
+            .date(date)
+            .build();
+
+        assertThat(visit.getId()).isEqualTo(1);
+        assertThat(visit.getPetId()).isEqualTo(2);
+        assertThat(visit.getDescription()).isEqualTo("Complete Visit");
+        assertThat(visit.getDate()).isEqualTo(date);
+    }
 }

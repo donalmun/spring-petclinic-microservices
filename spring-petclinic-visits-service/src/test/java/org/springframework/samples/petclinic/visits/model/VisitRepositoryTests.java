@@ -108,4 +108,16 @@ class VisitRepositoryTests {
         assertThat(visit.getId()).isNotNull();
         assertThat(visit.getDescription()).isEmpty();
     }
+
+    @Test
+    void shouldSaveVisitWithMaxDescriptionLength() {
+        Visit visit = new Visit();
+        visit.setPetId(7);
+        visit.setDate(new Date());
+        visit.setDescription("a".repeat(8192)); // Max length description
+
+        visit = visitRepository.save(visit);
+        assertThat(visit.getId()).isNotNull();
+        assertThat(visit.getDescription()).hasSize(8192);
+    }
 }

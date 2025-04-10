@@ -76,4 +76,18 @@ class VisitResourceTest {
                 .content("{\"description\":\"Invalid Pet Visit\"}"))
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldCreateVisitWithValidPetId() throws Exception {
+        Visit visit = Visit.VisitBuilder.aVisit()
+            .description("Test Visit")
+            .build();
+
+        given(visitRepository.save(visit)).willReturn(visit);
+
+        mvc.perform(post("/owners/*/pets/1/visits")
+                .contentType("application/json")
+                .content("{\"description\":\"Test Visit\"}"))
+            .andExpect(status().isCreated());
+    }
 }
