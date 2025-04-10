@@ -84,4 +84,28 @@ class VisitRepositoryTests {
         List<Visit> visits = visitRepository.findByPetIdIn(null);
         assertThat(visits).isEmpty();
     }
+
+    @Test
+    void shouldSaveVisitWithFutureDate() {
+        Visit visit = new Visit();
+        visit.setPetId(7);
+        visit.setDate(new Date(System.currentTimeMillis() + 86400000)); // 1 day in the future
+        visit.setDescription("Future Visit");
+
+        visit = visitRepository.save(visit);
+        assertThat(visit.getId()).isNotNull();
+        assertThat(visit.getDate()).isAfter(new Date());
+    }
+
+    @Test
+    void shouldSaveVisitWithEmptyDescription() {
+        Visit visit = new Visit();
+        visit.setPetId(7);
+        visit.setDate(new Date());
+        visit.setDescription(""); // Empty description
+
+        visit = visitRepository.save(visit);
+        assertThat(visit.getId()).isNotNull();
+        assertThat(visit.getDescription()).isEmpty();
+    }
 }

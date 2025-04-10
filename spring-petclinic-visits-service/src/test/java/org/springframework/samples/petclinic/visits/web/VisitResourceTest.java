@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,5 +67,13 @@ class VisitResourceTest {
         mvc.perform(get("/pets/visits?petId="))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.items").isEmpty());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenCreatingVisitWithInvalidPetId() throws Exception {
+        mvc.perform(post("/owners/*/pets/0/visits")
+                .contentType("application/json")
+                .content("{\"description\":\"Invalid Pet Visit\"}"))
+            .andExpect(status().isBadRequest());
     }
 }
