@@ -55,4 +55,31 @@ class VisitTest {
         Visit visit = new Visit();
         assertThat(visit.getDate()).isNotNull();
     }
+
+    @Test
+    void testBuilderPatternWithDate() {
+        Date customDate = new Date();
+        Visit visit = Visit.VisitBuilder.aVisit()
+            .id(1)
+            .petId(2)
+            .description("Test Visit")
+            .date(customDate)
+            .build();
+
+        assertThat(visit.getDate()).isEqualTo(customDate);
+    }
+
+    @Test
+    void testSetDescriptionWithNull() {
+        Visit visit = new Visit();
+        visit.setDescription(null);
+        assertThat(visit.getDescription()).isNull();
+    }
+
+    @Test
+    void testSetPetIdWithZero() {
+        Visit visit = new Visit();
+        visit.setPetId(0);
+        assertThat(visit.getPetId()).isEqualTo(0);
+    }
 }

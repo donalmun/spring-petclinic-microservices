@@ -61,4 +61,21 @@ class VisitRepositoryTests {
         List<Visit> visits = visitRepository.findByPetIdIn(List.of(999, 1000));
         assertThat(visits).isEmpty();
     }
+
+    @Test
+    void shouldHandleEmptyPetIdList() {
+        List<Visit> visits = visitRepository.findByPetIdIn(List.of());
+        assertThat(visits).isEmpty();
+    }
+
+    @Test
+    void shouldHandleNullDescription() {
+        Visit visit = new Visit();
+        visit.setPetId(7);
+        visit.setDate(new Date());
+        visit.setDescription(null);
+
+        visit = visitRepository.save(visit);
+        assertThat(visit.getDescription()).isNull();
+    }
 }
