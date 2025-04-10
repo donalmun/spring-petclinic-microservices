@@ -17,4 +17,10 @@ class ResourceNotFoundExceptionTest {
         // Assert
         assertEquals(message, exception.getMessage());
     }
+
+    @Test
+    void testExceptionMessage() {
+        ResourceNotFoundException exception = new ResourceNotFoundException("Test message");
+        assertEquals("Test message", exception.getMessage());
+    }
 }

@@ -117,4 +117,19 @@ class OwnerResourceTest {
         verify(ownerEntityMapper, never()).map(any(), any());
         verify(ownerRepository, never()).save(any());
     }
+
+    @Test
+    void testUpdateOwnerSuccess() {
+        // Arrange
+        when(ownerRepository.findById(1)).thenReturn(Optional.of(owner));
+        when(ownerRepository.save(owner)).thenReturn(owner);
+
+        // Act
+        ownerResource.updateOwner(1, ownerRequest);
+
+        // Assert
+        verify(ownerRepository).findById(1);
+        verify(ownerEntityMapper).map(owner, ownerRequest);
+        verify(ownerRepository).save(owner);
+    }
 }
