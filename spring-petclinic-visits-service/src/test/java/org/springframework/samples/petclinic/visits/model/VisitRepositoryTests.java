@@ -78,4 +78,10 @@ class VisitRepositoryTests {
         visit = visitRepository.save(visit);
         assertThat(visit.getDescription()).isNull();
     }
+
+    @Test
+    void shouldHandleNullPetIdInFindByPetIdIn() {
+        List<Visit> visits = visitRepository.findByPetIdIn(null);
+        assertThat(visits).isEmpty();
+    }
 }

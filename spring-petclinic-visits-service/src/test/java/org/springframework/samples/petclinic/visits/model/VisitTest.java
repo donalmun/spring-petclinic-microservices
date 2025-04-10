@@ -82,4 +82,26 @@ class VisitTest {
         visit.setPetId(0);
         assertThat(visit.getPetId()).isEqualTo(0);
     }
+
+    @Test
+    void testBuilderPatternWithNullValues() {
+        Visit visit = Visit.VisitBuilder.aVisit()
+            .id(null)
+            .petId(0)
+            .description(null)
+            .date(null)
+            .build();
+
+        assertThat(visit.getId()).isNull();
+        assertThat(visit.getPetId()).isEqualTo(0);
+        assertThat(visit.getDescription()).isNull();
+        assertThat(visit.getDate()).isNull();
+    }
+
+    @Test
+    void testSetIdWithNull() {
+        Visit visit = new Visit();
+        visit.setId(null);
+        assertThat(visit.getId()).isNull();
+    }
 }
