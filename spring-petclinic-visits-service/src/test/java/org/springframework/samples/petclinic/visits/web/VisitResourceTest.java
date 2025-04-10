@@ -58,4 +58,13 @@ class VisitResourceTest {
             .andExpect(jsonPath("$.items[1].petId").value(222))
             .andExpect(jsonPath("$.items[2].petId").value(222));
     }
+
+    @Test
+    void shouldReturnEmptyVisitsWhenNoPetIdsProvided() throws Exception {
+        given(visitRepository.findByPetIdIn(asList())).willReturn(asList());
+
+        mvc.perform(get("/pets/visits?petId="))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items").isEmpty());
+    }
 }
