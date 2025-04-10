@@ -49,4 +49,16 @@ class VisitRepositoryTests {
         Collection<Visit> visits = visitRepository.findByPetId(7);
         assertThat(visits.size()).isEqualTo(visitCountBefore + 1);
     }
+
+    @Test
+    void shouldReturnEmptyWhenNoVisitsFoundByPetId() {
+        Collection<Visit> visits = visitRepository.findByPetId(999);
+        assertThat(visits).isEmpty();
+    }
+
+    @Test
+    void shouldReturnEmptyWhenNoVisitsFoundByPetIds() {
+        List<Visit> visits = visitRepository.findByPetIdIn(List.of(999, 1000));
+        assertThat(visits).isEmpty();
+    }
 }

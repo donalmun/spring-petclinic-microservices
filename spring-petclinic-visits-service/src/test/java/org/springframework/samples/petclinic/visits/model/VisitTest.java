@@ -49,4 +49,10 @@ class VisitTest {
         assertThat(visit.getPetId()).isEqualTo(2);
         assertThat(visit.getDescription()).isEqualTo("Test Visit");
     }
+
+    @Test
+    void testDefaultDateInitialization() {
+        Visit visit = new Visit();
+        assertThat(visit.getDate()).isNotNull();
+    }
 }
