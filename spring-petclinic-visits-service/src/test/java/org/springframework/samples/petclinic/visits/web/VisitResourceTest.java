@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,5 +58,36 @@ class VisitResourceTest {
             .andExpect(jsonPath("$.items[0].petId").value(111))
             .andExpect(jsonPath("$.items[1].petId").value(222))
             .andExpect(jsonPath("$.items[2].petId").value(222));
+    }
+
+    @Test
+    void shouldReturnEmptyVisitsWhenNoPetIdsProvided() throws Exception {
+        given(visitRepository.findByPetIdIn(asList())).willReturn(asList());
+
+        mvc.perform(get("/pets/visits?petId="))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items").isEmpty());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenCreatingVisitWithInvalidPetId() throws Exception {
+        mvc.perform(post("/owners/*/pets/0/visits")
+                .contentType("application/json")
+                .content("{\"description\":\"Invalid Pet Visit\"}"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldCreateVisitWithValidPetId() throws Exception {
+        Visit visit = Visit.VisitBuilder.aVisit()
+            .description("Test Visit")
+            .build();
+
+        given(visitRepository.save(visit)).willReturn(visit);
+
+        mvc.perform(post("/owners/*/pets/1/visits")
+                .contentType("application/json")
+                .content("{\"description\":\"Test Visit\"}"))
+            .andExpect(status().isCreated());
     }
 }
