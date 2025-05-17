@@ -121,7 +121,7 @@ pipeline {
                             publishChecks(
                                 name: 'Test Code Coverage',
                                 title: 'Code Coverage Check Failed!',
-                                summary: "Coverage must be at least 70%. Your coverage is ${coveragePercentage}%.",
+                                summary: "Coverage must be at least 70%. Your coverage is ${coveragePercentage}.",
                                 text: 'Increase test coverage and retry the build.',
                                 detailsURL: env.BUILD_URL,
                                 conclusion: 'FAILURE'
